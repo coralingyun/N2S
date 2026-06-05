@@ -1,6 +1,8 @@
 # YAML Schema Design
 
-This document defines the MVP YAML structure for converting novel chapters into an editable screenplay draft. The schema is intentionally compact so that the first implementation can be validated, tested, and extended without relying on a real LLM API.
+This document defines the MVP YAML structure for converting novel chapters into an editable screenplay draft. The schema is intentionally compact so that the implementation can be validated, tested, repaired, and extended.
+
+The real LLM pipeline generates this complete structure after chapter analysis, character extraction, scene splitting, and screenplay YAML generation. If validation fails, the YAML repair prompt may be called at most two times.
 
 ## Top-Level Structure
 
@@ -38,9 +40,9 @@ Each scene must contain:
 - `scene_heading`: object with `location`, `time`, and `interior_exterior`.
 - `purpose`: the dramatic function of the scene.
 - `conflict`: the central conflict in the scene.
-- `characters_present`: character IDs appearing in the scene.
+- `characters_present`: at least one character ID appearing in the scene.
 - `emotional_arc`: object with `start` and `end`.
-- `beats`: ordered list of scene beats.
+- `beats`: ordered list of scene beats; at least one beat is required.
 
 ## Beat Object
 
@@ -49,7 +51,21 @@ Each scene must contain:
 - `action`: visible action or staging.
 - `dialogue`: spoken line; must include `character`.
 - `narration`: voice-over, narration, or retained prose information.
-- `note`: adaptation note embedded at beat level.
+- `camera`: camera or shot-level instruction.
+- `transition`: transition beat inside a scene.
+
+## Validation Constraints
+
+- `metadata.source_chapter_count` must be greater than or equal to 3.
+- `characters` must contain at least one character.
+- `scenes` must contain at least one scene.
+- Every scene must include `scene_id`, `scene_heading`, `characters_present`, and `beats`.
+- `characters_present` must contain at least one character ID.
+- `beats` must contain at least one beat.
+- `beat.type` must be one of `action`, `dialogue`, `narration`, `camera`, or `transition`.
+- A `dialogue` beat must include `character`.
+- Scene character references and dialogue character references must point to IDs in `characters`.
+- Transitions must reference existing `scene_id` values.
 
 ## Example
 
@@ -120,7 +136,7 @@ notes:
 
 `scenes` is the core level because a screenplay is primarily organized as scenes.
 
-`beats` represent ordered internal scene units, including action, dialogue, narration, and notes.
+`beats` represent ordered internal scene units, including action, dialogue, narration, camera direction, and transition information.
 
 `transitions` records how scenes connect and can later support richer editing or shot-level planning.
 

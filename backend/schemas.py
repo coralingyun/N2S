@@ -68,9 +68,15 @@ class EmotionalArc(BaseModel):
 
 class Beat(BaseModel):
     beat_id: str
-    type: Literal["action", "dialogue", "narration", "note"]
+    type: Literal["action", "dialogue", "narration", "camera", "transition"]
     content: str
     character: str | None = None
+
+    @model_validator(mode="after")
+    def validate_dialogue_character(self) -> "Beat":
+        if self.type == "dialogue" and not self.character:
+            raise ValueError(f"Dialogue beat {self.beat_id} is missing character.")
+        return self
 
 
 class Scene(BaseModel):
@@ -79,7 +85,7 @@ class Scene(BaseModel):
     scene_heading: SceneHeading
     purpose: str
     conflict: str
-    characters_present: list[str]
+    characters_present: list[str] = Field(min_length=1)
     emotional_arc: EmotionalArc
     beats: list[Beat] = Field(min_length=1)
 
@@ -115,8 +121,6 @@ class Screenplay(BaseModel):
             if missing:
                 raise ValueError(f"Scene {scene.scene_id} references unknown characters: {missing}")
             for beat in scene.beats:
-                if beat.type == "dialogue" and not beat.character:
-                    raise ValueError(f"Dialogue beat {beat.beat_id} is missing character.")
                 if beat.character and beat.character not in character_ids:
                     raise ValueError(f"Beat {beat.beat_id} references unknown character {beat.character}.")
 

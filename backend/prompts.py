@@ -1,10 +1,6 @@
-# Prompt Design
+"""Prompt templates for real LLM integration."""
 
-The backend keeps prompt templates in `backend/prompts.py`. Mock mode does not call a real model, but OpenAI-compatible mode uses these templates as the contract for structured model output.
-
-## Chapter Analysis Prompt
-
-```text
+CHAPTER_ANALYSIS_PROMPT = """\
 你是小说结构分析助手。请只根据输入章节进行分析，不要补充原文没有支持的情节。
 
 输入：
@@ -13,13 +9,19 @@ The backend keeps prompt templates in `backend/prompts.py`. Mock mode does not c
 - 章节正文：
 {chapter_text}
 
+任务：
+1. 提取本章出现的地点。
+2. 提取本章出现的人物及其行动。
+3. 概括本章主要事件，按发生顺序排列。
+4. 识别本章主要冲突。
+5. 描述本章情绪变化，包括 start 和 end。
+6. 对不确定内容写入 unresolved_issues，不要伪造事实。
+
 只输出 JSON，不要输出解释文字。JSON 字段必须为：
 chapter_id, title, summary, locations, characters, events, conflicts, emotional_shift, unresolved_issues。
-```
+"""
 
-## Character Extraction Prompt
-
-```text
+CHARACTER_EXTRACTION_PROMPT = """\
 你是剧本改编的人物分析助手。请根据全部章节摘要统一人物信息。
 
 输入章节分析 JSON：
@@ -33,11 +35,9 @@ chapter_id, title, summary, locations, characters, events, conflicts, emotional_
 5. 对不确定内容写入 unresolved_issues，不要伪造事实。
 
 只输出 JSON，不要输出解释文字。JSON 根字段必须包含 characters。
-```
+"""
 
-## Scene Splitting Prompt
-
-```text
+SCENE_SPLIT_PROMPT = """\
 你是剧本场景拆分助手。请将输入章节拆分为适合剧本改编的场景。
 
 输入：
@@ -56,11 +56,9 @@ chapter_id, title, summary, locations, characters, events, conflicts, emotional_
 4. 如果无法确定地点或时间，使用空字符串或 unresolved_issues 说明。
 
 只输出 JSON，不要输出解释文字。JSON 根字段必须包含 scenes。
-```
+"""
 
-## Screenplay Generation Prompt
-
-```text
+SCREENPLAY_YAML_PROMPT = """\
 你是剧本 YAML 生成助手。请将章节分析、人物表和场景拆分结果合并为完整 screenplay YAML。
 
 Schema 摘要：
@@ -87,11 +85,9 @@ Schema 摘要：
 6. beat.type 只能使用 action、dialogue、narration、camera、transition。
 7. dialogue 类型 beat 必须包含 character 字段。
 8. 不要新增输入中没有依据的剧情。
-```
+"""
 
-## YAML Repair Prompt
-
-```text
+YAML_REPAIR_PROMPT = """\
 你是 YAML Schema 修复助手。请修复输入 YAML，使其符合给定 Schema。
 
 原始 YAML：
@@ -110,4 +106,15 @@ Schema 摘要：
 4. beat.type 只能是 action、dialogue、narration、camera、transition。
 5. dialogue 类型 beat 必须包含 character 字段。
 6. 只输出修复后的 YAML，不输出解释文字。
-```
+"""
+
+SCHEMA_SUMMARY = """\
+顶层字段：project, metadata, story, characters, structure, scenes, transitions, notes。
+metadata.source_chapter_count >= 3。
+characters 至少 1 个，每个角色必须有 id, name, role, description, motivation。
+scenes 至少 1 个。每个 scene 必须有 scene_id, source_chapter, scene_heading, purpose, conflict, characters_present, emotional_arc, beats。
+scene_heading 必须包含 location, time, interior_exterior；interior_exterior 只能是 INT 或 EXT。
+characters_present 至少 1 个。
+beats 至少 1 个。beat.type 只能是 action, dialogue, narration, camera, transition。
+dialogue beat 必须包含 character。
+"""
