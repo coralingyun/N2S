@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI 小说转剧本工具</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="app-header">
+        <div>
+          <h1>AI 小说转剧本工具</h1>
+          <p>粘贴不少于 3 章的小说文本，生成可编辑、可校验的 YAML 剧本初稿。</p>
+        </div>
+        <div id="healthStatus" class="status-pill status-muted">检查后端中</div>
+      </header>
+
+      <section class="workspace" aria-label="小说转剧本工作区">
+        <section class="panel">
+          <div class="panel-header">
+            <h2>小说文本</h2>
+            <button id="loadSampleButton" type="button">加载示例小说</button>
+          </div>
+          <textarea
+            id="novelInput"
+            spellcheck="false"
+            placeholder="请粘贴至少 3 个章节的小说文本，例如：第一章、第二章、第三章..."
+          ></textarea>
+          <button id="convertButton" class="primary" type="button">生成剧本 YAML</button>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>YAML 剧本</h2>
+            <div class="button-row">
+              <button id="validateButton" type="button">校验 YAML</button>
+              <button id="copyButton" type="button">复制 YAML</button>
+              <button id="downloadButton" type="button">下载 YAML</button>
+            </div>
+          </div>
+          <textarea
+            id="yamlOutput"
+            spellcheck="false"
+            placeholder="生成后的 screenplay YAML 会显示在这里，也可以手动编辑后再校验。"
+          ></textarea>
+        </section>
+      </section>
+
+      <section class="feedback" aria-live="polite">
+        <div id="statusMessage" class="message">准备就绪。</div>
+        <div id="errorMessage" class="message error" hidden></div>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

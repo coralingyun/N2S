@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from .chapter_parser import ChapterParseError
@@ -22,6 +23,7 @@ from .yaml_validator import (
 ROOT = Path(__file__).resolve().parents[1]
 INPUT_PATH = ROOT / "examples" / "sample_novel.txt"
 OUTPUT_PATH = ROOT / "examples" / "sample_screenplay.yaml"
+FRONTEND_DIR = ROOT / "frontend"
 
 app = FastAPI(title="Novel to Screenplay AI", version="0.2")
 
@@ -37,6 +39,11 @@ class ValidateRequest(BaseModel):
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/sample-novel")
+def sample_novel() -> dict[str, str]:
+    return {"text": INPUT_PATH.read_text(encoding="utf-8")}
 
 
 @app.post("/convert")
@@ -60,6 +67,10 @@ def validate(request: ValidateRequest) -> dict[str, Any]:
         return {"ok": True, "errors": []}
     except ScreenplayValidationError as exc:
         return {"ok": False, "errors": exc.errors, "message": str(exc)}
+
+
+if FRONTEND_DIR.exists():
+    app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
 
 
 def main() -> None:

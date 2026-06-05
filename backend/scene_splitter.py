@@ -18,7 +18,7 @@ def split_chapter_into_scenes(chapter: Chapter, analysis: dict) -> list[dict]:
                 "time": "night" if chapter.order in {1, 3} else "afternoon",
                 "interior_exterior": "EXT" if chapter.order == 3 else "INT",
             },
-            "purpose": f"Adapt the central event of {chapter.title} into a playable scene.",
+            "purpose": f"将{chapter.title}的核心事件转化为可表演的剧本场景。",
             "conflict": conflict,
             "characters_present": ["char_001", "char_002"],
             "emotional_arc": analysis.get("emotional_shift", {"start": "", "end": ""}),
